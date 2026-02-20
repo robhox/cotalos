@@ -54,15 +54,15 @@ export default function HomePage() {
       </div>
 
       <div className="mx-auto w-full max-w-6xl space-y-14 px-6 pb-6 pt-10 md:space-y-20 md:px-8 md:pb-12 md:pt-14">
-        <section className="reveal relative overflow-hidden py-3 md:py-5">
+        <section className="reveal relative overflow-hidden py-3 md:pt-4 pb-16">
           <div className="pointer-events-none absolute inset-0 opacity-55 [background-image:linear-gradient(to_right,rgba(107,27,40,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(107,27,40,0.06)_1px,transparent_1px)] [background-size:48px_48px]" />
           <div className="relative grid gap-8 lg:items-start">
-            <div className="space-y-7">
+            <div className="space-y-7 flex flex-col items-center">
               <p className="inline-flex rounded-full border border-[color:var(--color-primary)]/25 bg-white/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-primary)]">
                 Annuaire des boucheries et traiteurs
               </p>
 
-              <h1 className="max-w-3xl font-hero md:leading-tight text-4xl text-[color:var(--color-primary)] sm:text-5xl md:text-6xl">
+              <h1 className="max-w-3xl text-center font-hero md:leading-tight text-4xl text-[color:var(--color-primary)] sm:text-5xl md:text-6xl">
                 Commandez en ligne chez votre boucher ou traiteur
               </h1>
 
@@ -71,8 +71,10 @@ export default function HomePage() {
                 ou son nom
               </p>
 
-              <div className="p-2 sm:p-12">
-                <SearchBox index={searchIndex} />
+              <div className="pt-2 md:pt-4">
+                <div className="max-w-5xl w-full">
+                  <SearchBox index={searchIndex} />
+                </div>
               </div>
             </div>
           </div>
