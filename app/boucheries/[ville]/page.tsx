@@ -47,10 +47,11 @@ export default async function VillePage({ params }: VillePageProps) {
   return (
     <section className="mx-auto w-full max-w-5xl px-6 py-14 md:px-10 md:py-20">
       <header className="reveal mb-8 space-y-3">
-        <p className="text-sm uppercase tracking-wide text-black/60">Page ville</p>
-        <h1 className="font-display text-4xl text-[color:var(--color-primary)] md:text-5xl">{ville}</h1>
+        <h1 className="font-display text-4xl text-[color:var(--color-primary)] md:text-5xl">
+          {ville}
+        </h1>
         <p className="max-w-3xl text-black/70">
-          Liste locale de boucheries, charcuteries et traiteurs. La commande en ligne n est pas encore disponible.
+          Liste locale de boucheries, charcuteries et traiteurs.
         </p>
       </header>
 
@@ -62,7 +63,9 @@ export default async function VillePage({ params }: VillePageProps) {
               className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-black/10 bg-[color:var(--color-surface)] px-5 py-4 hover:border-[color:var(--color-primary)]/45"
             >
               <span className="font-medium">{commerce.nom}</span>
-              <span className="text-sm uppercase tracking-wide text-black/55">{commerce.categorie}</span>
+              <span className="text-sm uppercase tracking-wide text-black/55">
+                {commerce.categorie}
+              </span>
             </Link>
           </li>
         ))}

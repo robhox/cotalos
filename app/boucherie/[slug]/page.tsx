@@ -88,23 +88,6 @@ export default async function CommercePage({ params }: CommercePageProps) {
             <p className="max-w-3xl text-base leading-7 text-black/80 md:text-lg">
               {commerce.adresse}, {commerce.codePostal} {commerce.ville}
             </p>
-
-            <div className="flex flex-wrap gap-3 pt-1">
-              {commerce.telephone ? (
-                <a
-                  href={`tel:${sanitizedPhone}`}
-                  className="inline-flex h-11 items-center rounded-xl bg-[color:var(--color-primary)] px-5 text-sm font-semibold text-[color:var(--color-bg)] hover:bg-[color:var(--color-primary)]/92"
-                >
-                  Appeler le commerce
-                </a>
-              ) : null}
-              <Link
-                href="/gerer-ou-supprimer-cette-fiche"
-                className="inline-flex h-11 items-center rounded-xl border border-black/15 bg-white px-5 text-sm font-semibold text-black/80 hover:border-[color:var(--color-primary)]/35 hover:text-[color:var(--color-primary)]"
-              >
-                Mettre a jour cette fiche
-              </Link>
-            </div>
           </div>
         </header>
 
@@ -114,9 +97,13 @@ export default async function CommercePage({ params }: CommercePageProps) {
         >
           <div className="space-y-6">
             <article className="rounded-2xl border border-black/10 bg-white p-6 shadow-premium md:p-8">
-              <h2 className="font-display text-3xl text-[color:var(--color-primary)]">Etat du service</h2>
+              <h2 className="font-display text-3xl text-[color:var(--color-primary)]">
+                Etat du service
+              </h2>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-black/75 md:text-base">
-                La precommande n est pas encore active pour ce commerce sur cotalos.be. Nous mesurons l interet des clients pour prioriser l activation de la commande en ligne.
+                La precommande n est pas encore active pour ce commerce sur
+                cotalos.be. Nous mesurons l interet des clients pour prioriser l
+                activation de la commande en ligne.
               </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <button
@@ -135,28 +122,45 @@ export default async function CommercePage({ params }: CommercePageProps) {
             </article>
 
             <article className="rounded-2xl border border-black/10 bg-[color:var(--color-surface)] p-6 md:p-8">
-              <h2 className="font-display text-3xl text-[color:var(--color-primary)]">Informations publiques</h2>
+              <h2 className="font-display text-3xl text-[color:var(--color-primary)]">
+                Informations publiques
+              </h2>
               <dl className="mt-5 grid gap-4 text-sm text-black/75 sm:grid-cols-2 md:text-base">
                 <div className="rounded-xl border border-black/8 bg-white/85 p-4">
-                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">Categorie</dt>
-                  <dd className="mt-1 font-semibold text-[color:var(--color-primary)]">{readableCategory}</dd>
+                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">
+                    Categorie
+                  </dt>
+                  <dd className="mt-1 font-semibold text-[color:var(--color-primary)]">
+                    {readableCategory}
+                  </dd>
                 </div>
                 <div className="rounded-xl border border-black/8 bg-white/85 p-4">
-                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">Ville</dt>
-                  <dd className="mt-1 font-semibold text-[color:var(--color-primary)]">{commerce.ville}</dd>
+                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">
+                    Ville
+                  </dt>
+                  <dd className="mt-1 font-semibold text-[color:var(--color-primary)]">
+                    {commerce.ville}
+                  </dd>
                 </div>
                 <div className="rounded-xl border border-black/8 bg-white/85 p-4">
-                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">Adresse</dt>
+                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">
+                    Adresse
+                  </dt>
                   <dd className="mt-1">{commerce.adresse}</dd>
                 </div>
                 <div className="rounded-xl border border-black/8 bg-white/85 p-4">
-                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">Code postal</dt>
+                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">
+                    Code postal
+                  </dt>
                   <dd className="mt-1">{commerce.codePostal}</dd>
                 </div>
                 <div className="rounded-xl border border-black/8 bg-white/85 p-4 sm:col-span-2">
-                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">Telephone</dt>
+                  <dt className="text-xs uppercase tracking-[0.14em] text-black/55">
+                    Telephone
+                  </dt>
                   <dd className="mt-1 font-medium">
-                    {commerce.telephone ?? "Non communique dans les donnees publiques"}
+                    {commerce.telephone ??
+                      "Non communique dans les donnees publiques"}
                   </dd>
                 </div>
               </dl>
@@ -165,10 +169,15 @@ export default async function CommercePage({ params }: CommercePageProps) {
 
           <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-2xl bg-[color:var(--color-primary)] p-6 text-[color:var(--color-bg)] shadow-premium">
-              <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--color-accent)]">Pour le commerce</p>
-              <h3 className="mt-3 font-display text-3xl">Passez a la precommande</h3>
+              <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--color-accent)]">
+                Pour le commerce
+              </p>
+              <h3 className="mt-3 font-display text-3xl">
+                Passez a la precommande
+              </h3>
               <p className="mt-3 text-sm leading-6 text-[color:var(--color-bg)]/85">
-                Activez votre fiche, simplifiez les prises de commandes et preparez les retraits en boutique.
+                Activez votre fiche, simplifiez les prises de commandes et
+                preparez les retraits en boutique.
               </p>
               <Link
                 href="/gerer-ou-supprimer-cette-fiche"
@@ -181,7 +190,6 @@ export default async function CommercePage({ params }: CommercePageProps) {
             <LegalDisclaimer />
           </aside>
         </section>
-
       </section>
     </div>
   );
