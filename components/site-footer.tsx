@@ -79,9 +79,11 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/15 pt-6 text-xs leading-relaxed text-[color:var(--color-bg)]/70">
-          <p>Donnees issues de sources publiques.</p>
-          <p>Ce site n est pas affilie aux commerces listes.</p>
+        <div className="mt-12 border-t border-white/15 pt-6 text-xs leading-relaxed text-[color:var(--color-bg)]/70 flex items-center justify-center gap-4">
+          <p>
+            Donnees issues de sources publiques. Ce site n est pas affilie aux
+            commerces listes.
+          </p>
         </div>
       </div>
     </footer>
