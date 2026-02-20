@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #6b1b28;
+  --color-bg: #f7f3f1;
+  --color-text: #1a1a1a;
+  --color-accent: #c2a878;
+  --color-surface: #fcf8f6;
+  --color-surface-strong: #efe6e1;
+  --color-footer: #2a1519;
+  --ease-out-premium: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background:
+    radial-gradient(circle at 15% -10%, #fff5ee 0%, rgba(255, 245, 238, 0) 35%),
+    radial-gradient(circle at 90% 10%, #efe2d8 0%, rgba(239, 226, 216, 0) 33%),
+    var(--color-bg);
+  color: var(--color-text);
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-ui), sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: var(--font-display), serif;
+}
+
+.font-hero {
+  font-family: var(--font-hero), serif;
+}
+
+a {
+  color: inherit;
+}
+
+.reveal {
+  animation: reveal-up 220ms var(--ease-out-premium) both;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+button,
+a {
+  transition-duration: 160ms;
+  transition-timing-function: ease;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 46%, white);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 78%, white);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none;
+    transition: none;
+    scroll-behavior: auto;
+  }
+}
