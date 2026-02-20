@@ -68,13 +68,11 @@ export default function HomePage() {
 
               <p className="max-w-2xl text-base leading-7 text-black/75 md:text-lg">
                 Trouvez votre boucherie ou votre traiteur par ville, code postal
-                ou son nom
+                ou via son nom
               </p>
 
-              <div className="pt-2 md:pt-4">
-                <div className="max-w-5xl w-full">
-                  <SearchBox index={searchIndex} />
-                </div>
+              <div className="w-full max-w-4xl pt-2 md:pt-4">
+                <SearchBox index={searchIndex} />
               </div>
             </div>
           </div>
