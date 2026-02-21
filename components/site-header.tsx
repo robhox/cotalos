@@ -31,13 +31,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 md:hidden">
-          <Link
-            href="/#commercants"
-            className="inline-flex h-9 items-center rounded-full bg-[color:var(--color-primary)] px-3 text-xs font-semibold text-[color:var(--color-bg)]"
-            data-track="header_merchant_cta_mobile"
-          >
-            Activer
-          </Link>
           <details className="group relative">
             <summary className="inline-flex h-9 w-14 cursor-pointer list-none items-center justify-center rounded-lg border border-black/15 bg-white text-[color:var(--color-primary)]">
               <span
@@ -62,12 +55,6 @@ export function SiteHeader() {
                     {link.label}
                   </Link>
                 ))}
-                <Link
-                  href="/mentions-legales"
-                  className="rounded-md px-3 py-2 text-sm hover:bg-[color:var(--color-primary)]/8"
-                >
-                  Mentions legales
-                </Link>
               </nav>
             </div>
           </details>

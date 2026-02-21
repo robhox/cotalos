@@ -117,12 +117,12 @@ export default async function CommercePage({ params }: CommercePageProps) {
           <div className="space-y-6">
             <article className="rounded-2xl border border-black/10 bg-white p-6 shadow-premium md:p-8">
               <h2 className="font-display text-3xl text-[color:var(--color-primary)]">
-                Etat du service
+                État du service
               </h2>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-black/75 md:text-base">
-                La precommande n est pas encore active pour ce commerce sur
-                cotalos.be. Nous mesurons l interet des clients pour prioriser l
-                activation de la commande en ligne.
+                {
+                  "La commande n'est pas encore active pour ce commerce sur cotalos.be 🥩 Nous mesurons l'interêt des clients pour prioriser l'activation de la commande en ligne."
+                }
               </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <button
@@ -192,15 +192,15 @@ export default async function CommercePage({ params }: CommercePageProps) {
                 Pour le commerce
               </p>
               <h3 className="mt-3 font-display text-3xl">
-                Passez a la precommande
+                Passez à la commande en ligne
               </h3>
               <p className="mt-3 text-sm leading-6 text-[color:var(--color-bg)]/85">
                 Activez votre fiche, simplifiez les prises de commandes et
-                preparez les retraits en boutique.
+                préparez les retraits en boutique.
               </p>
               <Link
                 href="/gerer-ou-supprimer-cette-fiche"
-                className="mt-5 inline-flex h-11 items-center rounded-xl bg-[color:var(--color-bg)] px-5 text-sm font-semibold text-[color:var(--color-primary)] hover:bg-[color:var(--color-bg)]/92"
+                className="mt-5 inline-flex h-11 w-full text-center justify-center items-center rounded-xl bg-[color:var(--color-bg)] px-5 text-sm font-semibold text-[color:var(--color-primary)] hover:bg-[color:var(--color-bg)]/92"
               >
                 Contacter cotalos
               </Link>
