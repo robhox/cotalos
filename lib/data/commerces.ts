@@ -1,10 +1,21 @@
-import type { Commerce, Prisma } from "@prisma/client";
+import { Prisma, type Commerce } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
 import { buildDefaultQuickCityEntries, normalizeSearchValue, slugifyVille } from "@/lib/data/search";
 import type { CommerceCategory, CommerceRecord, SearchIndexEntry } from "@/lib/types";
 
 type QueryResult<T> = { ok: true; data: T } | { ok: false; error: string };
+type CreateCommerceInterestStatus = "created" | "duplicate";
+
+type CreateCommerceInterestInput = {
+  commerceId: string;
+  fullName: string;
+};
+
+type CreateCommerceInterestResult = {
+  status: CreateCommerceInterestStatus;
+  count: number;
+};
 
 type CityResult = {
   city: string;
@@ -25,6 +36,8 @@ const COMMERCE_SELECT = {
   postalCode: true,
   phone: true
 } as const;
+
+const DB_UNAVAILABLE_ERROR = "Base locale indisponible. Lancez PostgreSQL et relancez l import.";
 
 const logDbError = (context: string, error: unknown): void => {
   const message = error instanceof Error ? error.message : String(error);
@@ -66,6 +79,18 @@ const rankByQuery = (label: string, normalizedQuery: string): number => {
   return 2;
 };
 
+const normalizeDisplayName = (input: string): string => input.replace(/\s+/g, " ").trim();
+
+export const normalizeFullName = (input: string): string =>
+  input
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’`´]/g, "'")
+    .replace(/[^a-z0-9'\-\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 export const getDatabaseStatus = async (): Promise<QueryResult<{ hasData: boolean }>> => {
   try {
     const first = await prisma.commerce.findFirst({
@@ -80,7 +105,7 @@ export const getDatabaseStatus = async (): Promise<QueryResult<{ hasData: boolea
     logDbError("getDatabaseStatus", error);
     return {
       ok: false,
-      error: "Base locale indisponible. Lancez PostgreSQL et relancez l import."
+      error: DB_UNAVAILABLE_ERROR
     };
   }
 };
@@ -102,7 +127,7 @@ export const getCommerceBySlug = async (
     logDbError("getCommerceBySlug", error);
     return {
       ok: false,
-      error: "Base locale indisponible. Lancez PostgreSQL et relancez l import."
+      error: DB_UNAVAILABLE_ERROR
     };
   }
 };
@@ -135,7 +160,7 @@ export const getCommercesByCitySlug = async (
     logDbError("getCommercesByCitySlug", error);
     return {
       ok: false,
-      error: "Base locale indisponible. Lancez PostgreSQL et relancez l import."
+      error: DB_UNAVAILABLE_ERROR
     };
   }
 };
@@ -156,7 +181,7 @@ export const listCitySlugs = async (): Promise<QueryResult<Array<{ city: string;
     logDbError("listCitySlugs", error);
     return {
       ok: false,
-      error: "Base locale indisponible. Lancez PostgreSQL et relancez l import."
+      error: DB_UNAVAILABLE_ERROR
     };
   }
 };
@@ -280,7 +305,86 @@ export const searchCommercesAndCities = async (
     logDbError("searchCommercesAndCities", error);
     return {
       ok: false,
-      error: "Base locale indisponible. Lancez PostgreSQL et relancez l import."
+      error: DB_UNAVAILABLE_ERROR
+    };
+  }
+};
+
+export const countCommerceInterests = async (
+  commerceId: string
+): Promise<QueryResult<number>> => {
+  try {
+    const count = await prisma.commerceInterest.count({
+      where: { commerceId }
+    });
+
+    return { ok: true, data: count };
+  } catch (error) {
+    logDbError("countCommerceInterests", error);
+    return {
+      ok: false,
+      error: DB_UNAVAILABLE_ERROR
+    };
+  }
+};
+
+export const createCommerceInterest = async (
+  input: CreateCommerceInterestInput
+): Promise<QueryResult<CreateCommerceInterestResult>> => {
+  const fullName = normalizeDisplayName(input.fullName);
+  const fullNameNormalized = normalizeFullName(fullName);
+
+  if (!fullName || !fullNameNormalized) {
+    return {
+      ok: false,
+      error: "Nom invalide."
+    };
+  }
+
+  try {
+    await prisma.commerceInterest.create({
+      data: {
+        fullName,
+        fullNameNormalized,
+        commerceId: input.commerceId
+      }
+    });
+
+    const countResult = await countCommerceInterests(input.commerceId);
+    if (!countResult.ok) {
+      return countResult;
+    }
+
+    return {
+      ok: true,
+      data: {
+        status: "created",
+        count: countResult.data
+      }
+    };
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      const countResult = await countCommerceInterests(input.commerceId);
+      if (!countResult.ok) {
+        return countResult;
+      }
+
+      return {
+        ok: true,
+        data: {
+          status: "duplicate",
+          count: countResult.data
+        }
+      };
+    }
+
+    logDbError("createCommerceInterest", error);
+    return {
+      ok: false,
+      error: DB_UNAVAILABLE_ERROR
     };
   }
 };

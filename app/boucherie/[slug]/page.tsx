@@ -1,14 +1,22 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 
 import { LegalDisclaimer } from "@/components/legal-disclaimer";
-import { getCommerceBySlug } from "@/lib/data/commerces";
+import {
+  countCommerceInterests,
+  createCommerceInterest,
+  getCommerceBySlug
+} from "@/lib/data/commerces";
 import { buildMetadata } from "@/lib/seo";
 
 interface CommercePageProps {
   params: Promise<{
     slug: string;
+  }>;
+  searchParams?: Promise<{
+    interest?: string | string[];
   }>;
 }
 
@@ -16,6 +24,63 @@ const categoryLabel: Record<string, string> = {
   boucherie: "Boucherie",
   charcuterie: "Charcuterie",
   traiteur: "Traiteur"
+};
+
+type InterestStatus = "success" | "duplicate" | "invalid" | "error";
+
+const parseInterestStatus = (value: string | undefined): InterestStatus | null => {
+  if (
+    value === "success" ||
+    value === "duplicate" ||
+    value === "invalid" ||
+    value === "error"
+  ) {
+    return value;
+  }
+  return null;
+};
+
+const pickSingleSearchParam = (
+  value: string | string[] | undefined
+): string | undefined => (Array.isArray(value) ? value[0] : value);
+
+const getInterestFeedback = (
+  status: InterestStatus | null
+): { message: string; className: string } | null => {
+  if (!status) {
+    return null;
+  }
+
+  if (status === "success") {
+    return {
+      message:
+        "Merci, votre intérêt a bien été enregistré pour cette boucherie.",
+      className:
+        "border-emerald-300/70 bg-emerald-50 text-emerald-900"
+    };
+  }
+
+  if (status === "duplicate") {
+    return {
+      message: "Cet intérêt est déjà enregistré pour ce nom dans cette boucherie.",
+      className:
+        "border-amber-300/70 bg-amber-50 text-amber-900"
+    };
+  }
+
+  if (status === "invalid") {
+    return {
+      message: "Entrez un nom et prénom valides (au moins 2 mots).",
+      className:
+        "border-amber-300/70 bg-amber-50 text-amber-900"
+    };
+  }
+
+  return {
+    message: "Impossible d'enregistrer votre intérêt pour le moment.",
+    className:
+      "border-rose-300/70 bg-rose-50 text-rose-900"
+  };
 };
 
 export async function generateMetadata({ params }: CommercePageProps): Promise<Metadata> {
@@ -47,8 +112,14 @@ export async function generateMetadata({ params }: CommercePageProps): Promise<M
   });
 }
 
-export default async function CommercePage({ params }: CommercePageProps) {
-  const { slug } = await params;
+export default async function CommercePage({
+  params,
+  searchParams
+}: CommercePageProps) {
+  const [{ slug }, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams ?? Promise.resolve<{ interest?: string | string[] }>({})
+  ]);
   const result = await getCommerceBySlug(slug);
 
   if (!result.ok) {
@@ -68,6 +139,58 @@ export default async function CommercePage({ params }: CommercePageProps) {
   if (!commerce) {
     notFound();
   }
+
+  const path = `/boucherie/${slug}`;
+  const interestCountResult = await countCommerceInterests(commerce.id);
+  const interestCount = interestCountResult.ok ? interestCountResult.data : 0;
+  const interestLabel =
+    interestCount === 1
+      ? "1 personne a marqué son intérêt pour la commande en ligne dans cette boucherie."
+      : `${interestCount} personnes ont marqué leur intérêt pour la commande en ligne dans cette boucherie.`;
+  const interestStatus = parseInterestStatus(
+    pickSingleSearchParam(resolvedSearchParams.interest)
+  );
+  const interestFeedback = getInterestFeedback(interestStatus);
+
+  const submitInterest = async (formData: FormData) => {
+    "use server";
+
+    const redirectToStatus = (status: InterestStatus): never => {
+      const params = new URLSearchParams();
+      params.set("interest", status);
+      redirect(`${path}?${params.toString()}`);
+    };
+
+    const rawFullName = formData.get("fullName");
+    const fullName =
+      typeof rawFullName === "string"
+        ? rawFullName.replace(/\s+/g, " ").trim()
+        : "";
+
+    if (
+      fullName.length < 3 ||
+      fullName.length > 120 ||
+      fullName.split(" ").filter(Boolean).length < 2
+    ) {
+      redirectToStatus("invalid");
+    }
+
+    const createResult = await createCommerceInterest({
+      commerceId: commerce.id,
+      fullName
+    });
+
+    if (!createResult.ok) {
+      redirectToStatus("error");
+      return;
+    }
+
+    const nextStatus: InterestStatus =
+      createResult.data.status === "created" ? "success" : "duplicate";
+
+    revalidatePath(path);
+    redirectToStatus(nextStatus);
+  };
 
   const readableCategory = categoryLabel[commerce.categorie] ?? commerce.categorie;
 
@@ -124,19 +247,66 @@ export default async function CommercePage({ params }: CommercePageProps) {
                   "La commande n'est pas encore active pour ce commerce sur cotalos.be 🥩 Nous mesurons l'interêt des clients pour prioriser l'activation de la commande en ligne."
                 }
               </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  className="inline-flex h-11 items-center justify-center rounded-xl bg-[color:var(--color-primary)] px-5 text-sm font-semibold text-[color:var(--color-bg)] hover:bg-[color:var(--color-primary)]/92"
+              <div className="mt-6 overflow-hidden rounded-xl border border-[color:var(--color-primary)]/15 bg-[linear-gradient(140deg,rgba(255,255,255,0.96),rgba(255,252,249,0.84))] p-4 shadow-[0_14px_32px_rgba(107,27,40,0.08)] md:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--color-primary)]/75">
+                    Priorite d activation
+                  </p>
+                  <span className="inline-flex rounded-full border border-[color:var(--color-primary)]/20 bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-[color:var(--color-primary)]/85">
+                    {interestCount}
+                  </span>
+                </div>
+
+                <form
+                  action={submitInterest}
+                  className="mt-3 grid gap-3 md:grid-cols-[1fr_auto] md:items-end"
                 >
-                  Etre prevenu de l ouverture
-                </button>
-                <Link
-                  href="/gerer-ou-supprimer-cette-fiche"
-                  className="inline-flex h-11 items-center justify-center rounded-xl border border-black/20 bg-[color:var(--color-surface)] px-5 text-sm font-semibold text-black/80 hover:border-[color:var(--color-primary)]/35"
-                >
-                  Je suis le commercant
-                </Link>
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="interest-full-name"
+                      className="text-xs font-semibold uppercase tracking-[0.13em] text-[color:var(--color-primary)]/75"
+                    >
+                      Nom Prénom
+                    </label>
+                    <input
+                      id="interest-full-name"
+                      name="fullName"
+                      type="text"
+                      required
+                      minLength={3}
+                      maxLength={120}
+                      autoComplete="name"
+                      placeholder="Ex. Camille Martin"
+                      className="h-11 w-full rounded-xl border border-black/15 bg-white/92 px-4 text-sm text-black/85 outline-none transition-all placeholder:text-black/45 focus:border-[color:var(--color-primary)]/65 focus:bg-white focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="inline-flex h-11 items-center justify-center rounded-xl bg-[color:var(--color-primary)] px-5 text-sm font-semibold text-[color:var(--color-bg)] shadow-[0_10px_24px_rgba(107,27,40,0.28)] transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-primary)]/92"
+                  >
+                    Marquer mon intérêt
+                  </button>
+                </form>
+
+                <p className="mt-4 text-sm leading-6 text-black/75">
+                  {interestLabel}
+                </p>
+
+                {interestFeedback ? (
+                  <p
+                    role="status"
+                    aria-live="polite"
+                    className={`mt-3 rounded-xl border px-4 py-3 text-sm ${interestFeedback.className}`}
+                  >
+                    {interestFeedback.message}
+                  </p>
+                ) : null}
+
+                {!interestCountResult.ok ? (
+                  <p className="mt-3 rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    Compteur temporairement indisponible.
+                  </p>
+                ) : null}
               </div>
             </article>
 

@@ -80,6 +80,9 @@ test("commerce page shows required legal disclaimers", async ({ page }) => {
   const { commerce } = await getDynamicEntries(baseURL, page.request);
 
   await page.goto(commerce.targetPath);
+  await expect(page.getByLabel("Nom Prénom")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Marquer mon intérêt" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Je suis le commercant" })).toHaveCount(0);
   await expect(page.getByText("donnees publiques", { exact: false })).toHaveCount(2);
   await expect(page.getByText("aucune affiliation commerciale", { exact: false })).toHaveCount(2);
 });

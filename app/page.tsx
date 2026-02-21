@@ -68,7 +68,7 @@ export default async function HomePage() {
               </p>
 
               <h1 className="max-w-3xl text-center font-hero md:leading-tight text-4xl text-[color:var(--color-primary)] sm:text-5xl md:text-6xl">
-                Passez vos commandes en ligne chez votre boucher
+                Passez commande en ligne chez votre boucher
               </h1>
 
               <p className="max-w-2xl text-base leading-7 text-black/75 md:text-lg">

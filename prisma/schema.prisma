@@ -56,9 +56,22 @@ model Commerce {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   importRun           ImportRun @relation(fields: [importRunId], references: [id], onDelete: Restrict)
+  interests           CommerceInterest[]
 
   @@index([enterpriseNumber])
   @@index([name])
   @@index([postalCode])
   @@index([city])
+}
+
+model CommerceInterest {
+  id                 String   @id @default(uuid())
+  fullName           String
+  fullNameNormalized String
+  commerceId         String
+  createdAt          DateTime @default(now())
+  commerce           Commerce @relation(fields: [commerceId], references: [id], onDelete: Cascade)
+
+  @@unique([commerceId, fullNameNormalized])
+  @@index([commerceId, createdAt])
 }
