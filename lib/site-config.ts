@@ -19,7 +19,7 @@ export const siteConfig: SiteConfig = {
     hostName: "[A REMPLACER] Hebergeur",
     hostAddress: "[A REMPLACER] Adresse hebergeur",
     hostPhone: "[A REMPLACER] Telephone hebergeur",
-    deletionRequestEmail: "[A REMPLACER] suppression@cotalos.be",
-    deletionSlaBusinessDays: 10,
+    deletionRequestEmail: "contact@cotalos.be",
+    deletionSlaBusinessDays: 30,
   },
 };

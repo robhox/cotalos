@@ -29,18 +29,18 @@ const steps = [
 
 const faqItems = [
   {
-    question: "Est-ce que la commande en ligne est deja disponible ?",
+    question: "Est-ce que la commande en ligne est déjà disponible ?",
     answer:
-      "Non. Nous informons les commerces de l interet des clients et les aidons a activer ce service."
+      "Pas encore ! Nous informons les commerces de l'intérêt des clients et les aidons à activer ce service.",
   },
   {
-    question: "Pourquoi mon boucher n apparait pas ?",
-    answer: "Nous ajoutons progressivement tous les commerces."
+    question: "Pourquoi mon boucher n'apparait pas ?",
+    answer: "Nous ajoutons progressivement tous les commerces.",
   },
   {
     question: "Est-ce gratuit ?",
-    answer: "Oui, c est gratuit pour les clients."
-  }
+    answer: "Oui, c'est gratuit pour les clients.",
+  },
 ];
 
 export default async function HomePage() {
@@ -169,7 +169,7 @@ export default async function HomePage() {
                 Espace commercants
               </p>
               <h2 className="font-display text-3xl md:text-4xl">
-                Vous etes boucher?
+                Vous êtes boucher?
               </h2>
               <p className="max-w-2xl text-sm leading-7 text-[color:var(--color-bg)]/85 md:text-base">
                 Activez les commandes en ligne, réduisez les appels répétitifs

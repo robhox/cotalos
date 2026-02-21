@@ -13,28 +13,31 @@ export default function GererOuSupprimerPage() {
 
   return (
     <LegalPageLayout
-      title="Gerer ou supprimer cette fiche"
-      lead="Vous representez un commerce reference ? Cette procedure vous permet de corriger ou retirer une fiche rapidement."
+      title="Gérer ou supprimer une fiche"
+      lead="Vous représentez un commerce référencé ? Cette procédure vous permet de corriger ou retirer une fiche rapidement."
     >
       <section className="space-y-2">
         <h2 className="text-lg font-semibold">Canal de demande</h2>
-        <p>Envoyez votre demande a l adresse: {legal.deletionRequestEmail}</p>
+        <p>Envoyez votre demande a l'adresse: {legal.deletionRequestEmail}</p>
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Informations a fournir</h2>
+        <h2 className="text-lg font-semibold">Informations à fournir</h2>
         <ul className="list-disc space-y-1 pl-6">
           <li>Nom du commerce et ville.</li>
-          <li>URL de la fiche concernee.</li>
+          <li>URL de la fiche concernée.</li>
           <li>Motif de la demande: correction ou suppression.</li>
-          <li>Coordonnees professionnelles permettant de verifier la legitimite.</li>
+          <li>
+            Coordonnées professionnelles permettant de vérifier la légitimité.
+          </li>
         </ul>
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Delai de traitement</h2>
+        <h2 className="text-lg font-semibold">Délai de traitement</h2>
         <p>
-          Dossier traite sous {legal.deletionSlaBusinessDays} jours ouvres maximum apres verification de la demande.
+          Dossier traité sous {legal.deletionSlaBusinessDays} jours ouvrés
+          maximum après vérification de la demande.
         </p>
       </section>
     </LegalPageLayout>
