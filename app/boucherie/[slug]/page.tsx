@@ -108,9 +108,9 @@ export async function generateMetadata({ params }: CommercePageProps): Promise<M
   const commerce = result.data;
 
   return buildMetadata({
-    title: `${commerce.nom} - ${commerce.ville} | cotalos.be`,
-    description: `Informations publiques de ${commerce.nom} a ${commerce.ville}. Service de precommande non encore actif.`,
-    path: `/boucherie/${slug}`
+    title: `${commerce.nom} - Boucherie à ${commerce.ville}`,
+    description: `La commande en ligne n’est pas encore disponible pour cette boucherie sur Cotalos. Souhaitez-vous pouvoir précommander ici la prochaine fois? Indiquez votre intérêt et nous prendrons contact avec la boucherie pour l’aider à activer la commande en ligne.`,
+    path: `/boucherie/${slug}`,
   });
 }
 
