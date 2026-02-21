@@ -10,6 +10,7 @@ import {
   getCommerceBySlug
 } from "@/lib/data/commerces";
 import { buildMetadata } from "@/lib/seo";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 interface CommercePageProps {
   params: Promise<{
@@ -181,6 +182,18 @@ export default async function CommercePage({
     });
 
     if (!createResult.ok) {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: `server-${commerce.id}`,
+        event: "interest_submission_failed",
+        properties: {
+          commerce_id: commerce.id,
+          commerce_nom: commerce.nom,
+          commerce_ville: commerce.ville,
+          commerce_categorie: commerce.categorie,
+          error: createResult.error,
+        },
+      });
       redirectToStatus("error");
       return;
     }
@@ -188,11 +201,40 @@ export default async function CommercePage({
     const nextStatus: InterestStatus =
       createResult.data.status === "created" ? "success" : "duplicate";
 
+    if (nextStatus === "success") {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: `server-${commerce.id}`,
+        event: "interest_submitted",
+        properties: {
+          commerce_id: commerce.id,
+          commerce_nom: commerce.nom,
+          commerce_ville: commerce.ville,
+          commerce_categorie: commerce.categorie,
+        },
+      });
+    }
+
     revalidatePath(path);
     redirectToStatus(nextStatus);
   };
 
   const readableCategory = categoryLabel[commerce.categorie] ?? commerce.categorie;
+
+  // Track commerce page view server-side (top of interest conversion funnel)
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: `server-pageview-${commerce.id}`,
+    event: "commerce_page_viewed",
+    properties: {
+      commerce_id: commerce.id,
+      commerce_nom: commerce.nom,
+      commerce_ville: commerce.ville,
+      commerce_categorie: commerce.categorie,
+      interest_count: interestCount,
+      $current_url: `https://cotalos.be${path}`,
+    },
+  });
 
   return (
     <div className="relative isolate overflow-hidden">

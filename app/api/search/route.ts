@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { searchCommercesAndCities } from "@/lib/data/commerces";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export const runtime = "nodejs";
 
@@ -12,6 +13,15 @@ export async function GET(request: Request) {
 
   const result = await searchCommercesAndCities(query, limit);
   if (!result.ok) {
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: "server-search-api",
+      event: "search_api_error",
+      properties: {
+        query,
+        error: result.error,
+      },
+    });
     return NextResponse.json(
       {
         error: result.error,

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 
 import { normalizeSearchValue, resolveSearchTarget } from "@/lib/data/search";
 import type { SearchIndexEntry } from "@/lib/types";
@@ -80,6 +81,16 @@ export function SearchBox() {
     });
   };
 
+  const onSuggestionClick = (suggestion: SearchIndexEntry): void => {
+    posthog.capture("search_suggestion_clicked", {
+      suggestion_label: suggestion.label,
+      suggestion_type: suggestion.type,
+      suggestion_path: suggestion.targetPath,
+      query,
+    });
+    navigateTo(suggestion);
+  };
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
 
@@ -94,9 +105,19 @@ export function SearchBox() {
     const target = resolveSearchTarget(query, submitEntries) ?? submitEntries[0] ?? null;
     if (!target) {
       setErrorMessage("Aucun resultat. Essayez une autre ville ou un autre commerce.");
+      posthog.capture("search_no_results", {
+        query,
+        suggestions_count: submitEntries.length,
+      });
       return;
     }
 
+    posthog.capture("search_submitted", {
+      query,
+      result_label: target.label,
+      result_type: target.type,
+      result_path: target.targetPath,
+    });
     navigateTo(target);
   };
 
@@ -172,7 +193,7 @@ export function SearchBox() {
               <li key={`${suggestion.type}-${suggestion.targetPath}`}>
                 <button
                   type="button"
-                  onClick={() => navigateTo(suggestion)}
+                  onClick={() => onSuggestionClick(suggestion)}
                   className="group flex w-full items-center justify-between rounded-xl border border-black/10 bg-white/80 px-3 py-2 text-left transition-all hover:-translate-y-0.5 hover:border-[color:var(--color-primary)]/35 hover:bg-white"
                   data-track="search_suggestion_click"
                 >
