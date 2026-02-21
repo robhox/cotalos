@@ -20,7 +20,7 @@ describe("buildBceCommerceDataset", () => {
     );
     expect(boucherie).toBeDefined();
     expect(boucherie?.enterpriseNumber).toBe("0123.456.789");
-    expect(boucherie?.name).toBe("Boucherie Centrale SPRL");
+    expect(boucherie?.name).toBe("Boucherie Centrale Sprl");
     expect(boucherie?.category).toBe("boucherie");
     expect(boucherie?.naceCode).toBe("47221");
     expect(boucherie?.matchedNaceCodes).toEqual(["47221"]);

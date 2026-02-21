@@ -89,6 +89,36 @@ const DEFAULT_NACE_CODES = [
   "47.221",
   "47.222"
 ] as const;
+const EXCLUDED_COMMERCE_NAME_TERMS = [
+  "colruyt",
+  "renmans",
+  "dufrais"
+] as const;
+const CITY_LOWERCASE_PARTICLES = new Set([
+  "a",
+  "aan",
+  "au",
+  "aux",
+  "d",
+  "de",
+  "den",
+  "der",
+  "des",
+  "du",
+  "en",
+  "et",
+  "l",
+  "la",
+  "le",
+  "les",
+  "op",
+  "sous",
+  "sur",
+  "ten",
+  "ter",
+  "van",
+  "von"
+]);
 const EXACT_NACE_CATEGORY_MAP: Record<string, CommerceCategory> = {
   "4722": "boucherie",
   "47221": "boucherie",
@@ -97,6 +127,84 @@ const EXACT_NACE_CATEGORY_MAP: Record<string, CommerceCategory> = {
 
 const toValue = (input: string | undefined): string => (input ?? "").trim();
 const normalizeNaceCode = (value: string): string => toValue(value).replace(/[^0-9]/g, "");
+const toTitleCaseLexeme = (value: string): string =>
+  value ? value.charAt(0).toLocaleUpperCase("fr-BE") + value.slice(1) : value;
+const normalizeForContainsMatch = (value: string): string =>
+  toValue(value)
+    .toLocaleLowerCase("fr-BE")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+export const normalizeCommerceName = (value: string): string => {
+  const cleaned = toValue(value).replace(/\s+/g, " ");
+  if (!cleaned) {
+    return "";
+  }
+
+  return cleaned
+    .toLocaleLowerCase("fr-BE")
+    .split(" ")
+    .map((word) =>
+      word
+        .split("-")
+        .map((segment) =>
+          segment
+            .split("'")
+            .map((lexeme) => toTitleCaseLexeme(lexeme))
+            .join("'")
+        )
+        .join("-")
+    )
+    .join(" ");
+};
+
+export const shouldExcludeCommerceName = (value: string): boolean => {
+  const normalized = normalizeForContainsMatch(value);
+  return EXCLUDED_COMMERCE_NAME_TERMS.some((term) => normalized.includes(term));
+};
+
+export const isMissingCommerceName = (value: string): boolean => {
+  const cleaned = toValue(value);
+  if (!cleaned) {
+    return true;
+  }
+  return /^[-\s]+$/.test(cleaned);
+};
+
+export const normalizeCityName = (value: string): string => {
+  const cleaned = toValue(value).replace(/\s+/g, " ");
+  if (!cleaned) {
+    return "";
+  }
+
+  const lower = cleaned.toLocaleLowerCase("fr-BE");
+  let isFirstLexeme = true;
+
+  return lower
+    .split(" ")
+    .map((word) =>
+      word
+        .split("-")
+        .map((segment) =>
+          segment
+            .split("'")
+            .map((lexeme) => {
+              if (!lexeme) {
+                return lexeme;
+              }
+              if (!isFirstLexeme && CITY_LOWERCASE_PARTICLES.has(lexeme)) {
+                isFirstLexeme = false;
+                return lexeme;
+              }
+              isFirstLexeme = false;
+              return toTitleCaseLexeme(lexeme);
+            })
+            .join("'")
+        )
+        .join("-")
+    )
+    .join(" ");
+};
 
 const isActiveAddress = (dateStrikingOff: string): boolean => toValue(dateStrikingOff) === "";
 
@@ -195,7 +303,7 @@ const assignContactValue = (contactMap: Map<string, ContactValue>, key: string, 
 const toAddressValue = (row: CsvRow): AddressValue => ({
   country: toValue(row.CountryFR) || toValue(row.CountryNL) || "BE",
   postalCode: toValue(row.Zipcode),
-  city: toValue(row.MunicipalityFR) || toValue(row.MunicipalityNL),
+  city: normalizeCityName(toValue(row.MunicipalityFR) || toValue(row.MunicipalityNL)),
   street: toValue(row.StreetFR) || toValue(row.StreetNL),
   houseNumber: toValue(row.HouseNumber),
   box: toValue(row.Box)
@@ -433,10 +541,16 @@ export const buildBceCommerceDataset = async (
       continue;
     }
 
-    const name =
+    const rawName =
       establishmentNames.get(establishmentNumber)?.value ??
       enterpriseNames.get(enterpriseNumber)?.value;
-    if (!name) {
+    if (!rawName) {
+      rowsSkipped += 1;
+      continue;
+    }
+
+    const name = normalizeCommerceName(rawName);
+    if (isMissingCommerceName(name) || shouldExcludeCommerceName(name)) {
       rowsSkipped += 1;
       continue;
     }

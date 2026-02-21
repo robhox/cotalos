@@ -1,7 +1,7 @@
 import type { Commerce, Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
-import { normalizeSearchValue, slugifyVille } from "@/lib/data/search";
+import { buildDefaultQuickCityEntries, normalizeSearchValue, slugifyVille } from "@/lib/data/search";
 import type { CommerceCategory, CommerceRecord, SearchIndexEntry } from "@/lib/types";
 
 type QueryResult<T> = { ok: true; data: T } | { ok: false; error: string };
@@ -225,21 +225,27 @@ export const searchCommercesAndCities = async (
   const normalizedQuery = normalizeSearchValue(query);
 
   try {
-    const [citiesResult, commerceRows] = await Promise.all([
-      listCitySlugs(),
-      prisma.commerce.findMany({
-        select: {
-          slug: true,
-          name: true,
-          city: true,
-          postalCode: true
-        }
-      })
-    ]);
+    const citiesResult = await listCitySlugs();
 
     if (!citiesResult.ok) {
       return citiesResult;
     }
+
+    if (!normalizedQuery) {
+      return {
+        ok: true,
+        data: buildDefaultQuickCityEntries(citiesResult.data, safeLimit)
+      };
+    }
+
+    const commerceRows = await prisma.commerce.findMany({
+      select: {
+        slug: true,
+        name: true,
+        city: true,
+        postalCode: true
+      }
+    });
 
     const cityEntries = buildCitySearchEntries(citiesResult.data, normalizedQuery);
     const commerceEntries = buildCommerceSearchEntries(commerceRows, normalizedQuery);

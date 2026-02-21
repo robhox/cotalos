@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
@@ -6,9 +6,27 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma =
   globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"]
-  });
+  (() => {
+    const resolvedDatabaseUrl =
+      process.env.DATABASE_URL ??
+      process.env.POSTGRES_PRISMA_URL ??
+      process.env.POSTGRES_URL ??
+      process.env.POSTGRES_URL_NON_POOLING;
+
+    const options: Prisma.PrismaClientOptions = {
+      log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"]
+    };
+
+    if (resolvedDatabaseUrl) {
+      options.datasources = {
+        db: {
+          url: resolvedDatabaseUrl
+        }
+      };
+    }
+
+    return new PrismaClient(options);
+  })();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

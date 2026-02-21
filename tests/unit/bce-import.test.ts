@@ -3,7 +3,11 @@ import {
   buildCommerceSlug,
   getEnterpriseDenominationPriority,
   getEstablishmentDenominationPriority,
-  parseBelgianDate
+  isMissingCommerceName,
+  normalizeCityName,
+  normalizeCommerceName,
+  parseBelgianDate,
+  shouldExcludeCommerceName
 } from "@/lib/import/bce-import";
 import { describe, expect, it } from "vitest";
 
@@ -27,6 +31,33 @@ describe("bce import helpers", () => {
     expect(buildAddressLine("Rue de Test", "12", "")).toBe("Rue de Test 12");
     expect(buildAddressLine("Rue de Test", "12", "BTE 4")).toBe("Rue de Test 12 BTE 4");
     expect(buildAddressLine("", "", "")).toBe("");
+  });
+
+  it("normalizes imported city names", () => {
+    expect(normalizeCityName("LIEGE")).toBe("Liege");
+    expect(normalizeCityName(" LA LOUVIERE ")).toBe("La Louviere");
+    expect(normalizeCityName("MONT-SUR-MARCHIENNE")).toBe("Mont-sur-Marchienne");
+    expect(normalizeCityName("SINT-JOOST-TEN-NOODE")).toBe("Sint-Joost-ten-Noode");
+  });
+
+  it("normalizes imported commerce names", () => {
+    expect(normalizeCommerceName("  BOUCHERIE   DE L'ETOILE  SPRL ")).toBe(
+      "Boucherie De L'Etoile Sprl"
+    );
+    expect(normalizeCommerceName("LA-MAISON DU BOEUF")).toBe("La-Maison Du Boeuf");
+  });
+
+  it("excludes disallowed chain names", () => {
+    expect(shouldExcludeCommerceName("Boucherie Renmans Namur")).toBe(true);
+    expect(shouldExcludeCommerceName("COLRUYT Boucherie")).toBe(true);
+    expect(shouldExcludeCommerceName("Le Comptoir Dufrais")).toBe(true);
+    expect(shouldExcludeCommerceName("Boucherie Centrale")).toBe(false);
+  });
+
+  it("treats dash-only names as missing", () => {
+    expect(isMissingCommerceName("-")).toBe(true);
+    expect(isMissingCommerceName(" - ")).toBe(true);
+    expect(isMissingCommerceName("Boucherie Centrale")).toBe(false);
   });
 
   it("ranks denomination priorities for establishment and enterprise", () => {
