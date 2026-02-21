@@ -49,9 +49,17 @@ test("all core routes return 200", async ({ page }) => {
 test("homepage exposes MVP messaging and merchant CTA", async ({ page }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Commandez en ligne chez votre boucher ou traiteur" })
+    page.getByRole("heading", { name: "Passez commande en ligne chez votre boucher" })
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Prenez contact avec nous" })).toBeVisible();
+});
+
+test("homepage exposes crawlable city links", async ({ page }) => {
+  await page.goto("/");
+
+  const cityLinks = page.locator('a[href^="/boucheries/"]');
+  await expect(cityLinks.first()).toBeVisible();
+  expect(await cityLinks.count()).toBeGreaterThan(0);
 });
 
 test("homepage search redirects to city route", async ({ page }) => {
@@ -85,6 +93,14 @@ test("commerce page shows required legal disclaimers", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Je suis le commercant" })).toHaveCount(0);
   await expect(page.getByText("donnees publiques", { exact: false })).toHaveCount(2);
   await expect(page.getByText("aucune affiliation commerciale", { exact: false })).toHaveCount(2);
+});
+
+test("commerce interest status query param is cleaned from canonical url", async ({ page }) => {
+  const baseURL = "http://127.0.0.1:3000";
+  const { commerce } = await getDynamicEntries(baseURL, page.request);
+
+  await page.goto(`${commerce.targetPath}?interest=success`);
+  await expect(page).toHaveURL(commerce.targetPath);
 });
 
 test("visual snapshots", async ({ page }) => {

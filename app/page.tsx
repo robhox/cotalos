@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import { SearchBox } from "@/components/search/search-box";
-import { getDatabaseStatus } from "@/lib/data/commerces";
+import { listCitySlugs, getDatabaseStatus } from "@/lib/data/commerces";
+import { buildDefaultQuickCityEntries } from "@/lib/data/search";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -44,6 +45,12 @@ const faqItems = [
 
 export default async function HomePage() {
   const dbStatus = await getDatabaseStatus();
+  const cityLinksResult =
+    dbStatus.ok && dbStatus.data.hasData ? await listCitySlugs() : null;
+  const popularCityLinks =
+    cityLinksResult && cityLinksResult.ok
+      ? buildDefaultQuickCityEntries(cityLinksResult.data, 6)
+      : [];
   const dbUnavailableMessage = !dbStatus.ok
     ? dbStatus.error
     : dbStatus.data.hasData
@@ -116,6 +123,40 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {popularCityLinks.length > 0 ? (
+          <section
+            className="reveal space-y-6"
+            style={{ animationDelay: "180ms" }}
+          >
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl text-[color:var(--color-primary)] md:text-4xl">
+                Villes populaires
+              </h2>
+              <p className="text-xs uppercase tracking-[0.16em] text-black/60">
+                Liens rapides
+              </p>
+            </div>
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {popularCityLinks.map((entry) => (
+                <li key={entry.targetPath}>
+                  <Link
+                    href={entry.targetPath}
+                    className="group flex h-full items-center justify-between rounded-xl border border-black/10 bg-white/75 px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)] transition-all hover:-translate-y-0.5 hover:border-[color:var(--color-primary)]/35 hover:bg-white"
+                  >
+                    <span>{entry.label}</span>
+                    <span
+                      aria-hidden="true"
+                      className="transition-transform group-hover:translate-x-0.5"
+                    >
+                      →
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         <section
           id="commercants"
           className="reveal rounded-xl relative overflow-hidden bg-[color:var(--color-primary)] px-6 py-10 text-[color:var(--color-bg)] xl:-mx-8 xl:px-12 xl:py-12"
@@ -128,7 +169,7 @@ export default async function HomePage() {
                 Espace commercants
               </p>
               <h2 className="font-display text-3xl md:text-4xl">
-                Vous etes boucher ou traiteur ?
+                Vous etes boucher?
               </h2>
               <p className="max-w-2xl text-sm leading-7 text-[color:var(--color-bg)]/85 md:text-base">
                 Activez les commandes en ligne, réduisez les appels répétitifs

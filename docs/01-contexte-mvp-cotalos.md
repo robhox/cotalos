@@ -1,7 +1,7 @@
 # Contexte produit et technique - MVP cotalos.be
 
 ## 1. Vision et objectif MVP
-Le MVP `cotalos.be` est un annuaire national de boucheries/traiteurs en Belgique, oriente SEO et capture de demande.  
+Le MVP `cotalos.be` est un annuaire national de boucheries en Belgique, oriente SEO et capture de demande.  
 Le produit ne vend pas encore un SaaS complet. Il sert a valider un pull market avant investissement dans une solution de precommande complete.
 
 Objectif principal:
@@ -27,7 +27,7 @@ H4 - Faisabilite acquisition:
 
 ## 3. Perimetre
 Inclus:
-- Annuaire Belgique complete des boucheries/traiteurs/charcuteries.
+- Annuaire Belgique complete des boucheries.
 - Homepage + pages ville + pages commerce + pages legales.
 - Capture d interet client (lead utilisateur).
 - Capture d interet commercant (lead pro).
@@ -50,7 +50,7 @@ Strategie langue MVP:
 - Le modele d URL et les donnees doivent rester compatibles avec une future extension NL.
 
 Personas prioritaires:
-- Client final cherchant "boucherie + ville" ou "traiteur + retrait + ville".
+- Client final cherchant "boucherie + ville".
 - Responsable de commerce voulant digitaliser la prise de commande.
 
 ## 5. Proposition de valeur
@@ -149,7 +149,7 @@ Colonnes minimales:
 - `longitude` NUMERIC(9,6) NULL.
 - `telephone` TEXT NULL.
 - `slug` TEXT NOT NULL UNIQUE.
-- `categorie` TEXT NOT NULL CHECK (`categorie` in ('boucherie','traiteur','charcuterie')).
+- `categorie` TEXT NOT NULL CHECK (`categorie` in ('boucherie')).
 - `source_principale` TEXT NOT NULL.
 - `date_import` TIMESTAMPTZ NOT NULL DEFAULT now().
 - `created_at` TIMESTAMPTZ NOT NULL DEFAULT now().
@@ -199,8 +199,6 @@ Principes:
 
 Cibles requetes:
 - `boucherie {ville}`
-- `traiteur {ville}`
-- `plateau barbecue {ville}`
 
 ## 10. Conformite legale
 Obligations:

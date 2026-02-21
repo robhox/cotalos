@@ -12,7 +12,7 @@ export function SiteFooter() {
               {siteConfig.name}
             </p>
             <p className="max-w-sm text-sm text-[color:var(--color-bg)]/80">
-              Annuaire de precommande pour boucheries et traiteurs locaux.
+              Annuaire de boucheries locales belges.
             </p>
           </div>
 

@@ -1,4 +1,4 @@
-export type CommerceCategory = "boucherie" | "traiteur" | "charcuterie";
+export type CommerceCategory = "boucherie";
 
 export interface LegalIdentity {
   editorName: string;
@@ -20,6 +20,8 @@ export interface SiteConfig {
   language: "fr-BE";
   defaultTitle: string;
   defaultDescription: string;
+  defaultSocialImagePath: string;
+  staticPagesLastModified: string;
   legalIdentity: LegalIdentity;
 }
 

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { getCommercesByCitySlug } from "@/lib/data/commerces";
 import { buildMetadata } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, serializeJsonLd } from "@/lib/seo-schema";
 
 interface VillePageProps {
   params: Promise<{
@@ -45,36 +46,8 @@ export default async function VillePage({ params }: VillePageProps) {
   const result = await getCommercesByCitySlug(villeParam);
 
   if (!result.ok) {
-    return (
-      <div className="relative isolate overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -left-16 top-8 h-64 w-64 rounded-full bg-[color:var(--color-accent)]/20 blur-3xl" />
-          <div className="absolute -right-24 top-48 h-96 w-96 rounded-full bg-[color:var(--color-primary)]/12 blur-3xl" />
-        </div>
-
-        <section className="mx-auto w-full max-w-6xl px-6 py-14 md:px-8 md:py-20">
-          <article className="reveal relative overflow-hidden rounded-2xl border border-black/10 bg-white/80 p-8 backdrop-blur-sm md:p-10">
-            <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,rgba(107,27,40,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(107,27,40,0.06)_1px,transparent_1px)] [background-size:42px_42px]" />
-            <div className="relative space-y-5">
-              <p className="inline-flex rounded-full border border-amber-400/55 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-900">
-                Donnees indisponibles
-              </p>
-              <h1 className="font-display text-4xl text-[color:var(--color-primary)] md:text-5xl">
-                Base locale indisponible
-              </h1>
-              <p className="max-w-3xl text-sm leading-7 text-black/75 md:text-base">
-                {result.error}
-              </p>
-              <Link
-                href="/"
-                className="inline-flex h-11 items-center rounded-xl bg-[color:var(--color-primary)] px-5 text-sm font-semibold text-[color:var(--color-bg)] hover:bg-[color:var(--color-primary)]/92"
-              >
-                Retour a l annuaire
-              </Link>
-            </div>
-          </article>
-        </section>
-      </div>
+    throw new Error(
+      `DB unavailable on /boucheries/${villeParam}: ${result.error}`,
     );
   }
 
@@ -86,9 +59,19 @@ export default async function VillePage({ params }: VillePageProps) {
   const postalCodes = Array.from(
     new Set(commerces.map((commerce) => commerce.codePostal)),
   ).sort((a, b) => a.localeCompare(b, "fr"));
+  const breadcrumbJsonLd = serializeJsonLd(
+    buildBreadcrumbJsonLd([
+      { name: "Accueil", path: "/" },
+      { name: `Boucheries a ${city}`, path: `/boucheries/${villeParam}` },
+    ]),
+  );
 
   return (
     <div className="relative isolate overflow-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }}
+      />
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-[color:var(--color-accent)]/24 blur-3xl" />
         <div className="absolute -right-20 top-56 h-96 w-96 rounded-full bg-[color:var(--color-primary)]/12 blur-3xl" />
@@ -176,7 +159,10 @@ export default async function VillePage({ params }: VillePageProps) {
                     </div>
 
                     <p className="relative mt-4 text-base leading-7 text-black/82">
-                      {commerce.adresse}, {commerce.codePostal} {commerce.ville}
+                      {commerce.adresse}
+                    </p>
+                    <p className="relative text-base leading-7 text-black/82">
+                      {commerce.codePostal} {commerce.ville}
                     </p>
 
                     <div className="relative mt-5 flex items-center justify-between border-t border-[color:var(--color-primary)]/14 pt-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/80">

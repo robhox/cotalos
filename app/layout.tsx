@@ -4,6 +4,12 @@ import type { ReactNode } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { buildMetadata } from "@/lib/seo";
+import {
+  buildOrganizationJsonLd,
+  buildWebsiteJsonLd,
+  serializeJsonLd
+} from "@/lib/seo-schema";
 import { siteConfig } from "@/lib/site-config";
 
 import "../styles/globals.css";
@@ -27,23 +33,31 @@ const heroFont = Playfair_Display({
   display: "swap"
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.siteUrl),
+export const metadata: Metadata = buildMetadata({
   title: siteConfig.defaultTitle,
   description: siteConfig.defaultDescription,
-  alternates: {
-    canonical: siteConfig.siteUrl
-  }
-};
+  path: "/"
+});
 
 interface RootLayoutProps {
   children: ReactNode;
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const organizationJsonLd = serializeJsonLd(buildOrganizationJsonLd());
+  const webSiteJsonLd = serializeJsonLd(buildWebsiteJsonLd());
+
   return (
     <html lang="fr-BE" className={`${uiFont.variable} ${displayFont.variable} ${heroFont.variable}`}>
       <body className="min-h-screen antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: organizationJsonLd }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: webSiteJsonLd }}
+        />
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <main className="flex-1">{children}</main>

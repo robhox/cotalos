@@ -3,13 +3,16 @@ import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 
+import { InterestStatusUrlCleaner } from "@/components/interest-status-url-cleaner";
 import { LegalDisclaimer } from "@/components/legal-disclaimer";
 import {
   countCommerceInterests,
   createCommerceInterest,
   getCommerceBySlug
 } from "@/lib/data/commerces";
+import { slugifyVille } from "@/lib/data/search";
 import { buildMetadata } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, serializeJsonLd } from "@/lib/seo-schema";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 interface CommercePageProps {
@@ -23,8 +26,6 @@ interface CommercePageProps {
 
 const categoryLabel: Record<string, string> = {
   boucherie: "Boucherie",
-  charcuterie: "Charcuterie",
-  traiteur: "Traiteur"
 };
 
 type InterestStatus = "success" | "duplicate" | "invalid" | "error";
@@ -124,16 +125,7 @@ export default async function CommercePage({
   const result = await getCommerceBySlug(slug);
 
   if (!result.ok) {
-    return (
-      <section className="mx-auto w-full max-w-5xl px-6 py-14 md:px-10 md:py-20">
-        <header className="mb-8 space-y-3">
-          <h1 className="font-display text-4xl text-[color:var(--color-primary)] md:text-5xl">
-            Base locale indisponible
-          </h1>
-          <p className="max-w-3xl text-black/70">{result.error}</p>
-        </header>
-      </section>
-    );
+    throw new Error(`DB unavailable on /boucherie/${slug}: ${result.error}`);
   }
 
   const commerce = result.data;
@@ -220,6 +212,17 @@ export default async function CommercePage({
   };
 
   const readableCategory = categoryLabel[commerce.categorie] ?? commerce.categorie;
+  const citySlug = slugifyVille(commerce.ville);
+  const breadcrumbJsonLd = serializeJsonLd(
+    buildBreadcrumbJsonLd([
+      { name: "Accueil", path: "/" },
+      {
+        name: `Boucheries a ${commerce.ville}`,
+        path: `/boucheries/${citySlug}`,
+      },
+      { name: commerce.nom, path },
+    ]),
+  );
 
   // Track commerce page view server-side (top of interest conversion funnel)
   const posthog = getPostHogClient();
@@ -238,6 +241,13 @@ export default async function CommercePage({
 
   return (
     <div className="relative isolate overflow-hidden">
+      {interestStatus ? (
+        <InterestStatusUrlCleaner canonicalPath={path} />
+      ) : null}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }}
+      />
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-[color:var(--color-accent)]/24 blur-3xl" />
         <div className="absolute -right-20 top-56 h-96 w-96 rounded-full bg-[color:var(--color-primary)]/12 blur-3xl" />

@@ -46,7 +46,7 @@ const logDbError = (context: string, error: unknown): void => {
 };
 
 const toCategory = (value: string): CommerceCategory => {
-  if (value === "traiteur" || value === "charcuterie" || value === "boucherie") {
+  if (value === "boucherie") {
     return value;
   }
   return "boucherie";
@@ -182,6 +182,48 @@ export const listCitySlugs = async (): Promise<QueryResult<Array<{ city: string;
     return {
       ok: false,
       error: DB_UNAVAILABLE_ERROR
+    };
+  }
+};
+
+export const listCitySitemapEntries = async (): Promise<
+  QueryResult<Array<{ city: string; slug: string; updatedAt: Date }>>
+> => {
+  try {
+    const rows = await prisma.commerce.findMany({
+      select: {
+        city: true,
+        updatedAt: true,
+      },
+      orderBy: [{ city: "asc" }],
+    });
+
+    const latestByCity = new Map<
+      string,
+      { city: string; slug: string; updatedAt: Date }
+    >();
+    for (const row of rows) {
+      const slug = slugifyVille(row.city);
+      const existing = latestByCity.get(slug);
+      if (!existing || row.updatedAt > existing.updatedAt) {
+        latestByCity.set(slug, {
+          city: row.city,
+          slug,
+          updatedAt: row.updatedAt,
+        });
+      }
+    }
+
+    const entries = Array.from(latestByCity.values()).sort((a, b) =>
+      a.city.localeCompare(b.city, "fr"),
+    );
+
+    return { ok: true, data: entries };
+  } catch (error) {
+    logDbError("listCitySitemapEntries", error);
+    return {
+      ok: false,
+      error: DB_UNAVAILABLE_ERROR,
     };
   }
 };

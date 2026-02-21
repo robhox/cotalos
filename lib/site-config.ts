@@ -4,9 +4,11 @@ export const siteConfig: SiteConfig = {
   name: "cotalos.be",
   siteUrl: "https://cotalos.be",
   language: "fr-BE",
-  defaultTitle: "cotalos.be - Annuaire boucheries et traiteurs en Belgique",
+  defaultTitle: "cotalos.be - Annuaire boucheries en Belgique",
   defaultDescription:
-    "Trouvez un boucher ou traiteur proche de chez vous. La precommande en ligne n est pas encore active.",
+    "Trouvez un boucher proche de chez vous. La precommande en ligne n est pas encore active.",
+  defaultSocialImagePath: "/opengraph-image",
+  staticPagesLastModified: "2026-02-01T00:00:00.000Z",
   legalIdentity: {
     editorName: "[A REMPLACER] Societe editrice",
     legalForm: "[A REMPLACER] Forme legale",
@@ -18,6 +20,6 @@ export const siteConfig: SiteConfig = {
     hostAddress: "[A REMPLACER] Adresse hebergeur",
     hostPhone: "[A REMPLACER] Telephone hebergeur",
     deletionRequestEmail: "[A REMPLACER] suppression@cotalos.be",
-    deletionSlaBusinessDays: 10
-  }
+    deletionSlaBusinessDays: 10,
+  },
 };
