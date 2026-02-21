@@ -40,10 +40,6 @@ body {
   font-family: var(--font-hero), serif;
 }
 
-:where(a) {
-  color: inherit;
-}
-
 .reveal {
   animation: reveal-up 220ms var(--ease-out-premium) both;
 }

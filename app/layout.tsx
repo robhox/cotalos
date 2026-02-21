@@ -14,6 +14,8 @@ import { siteConfig } from "@/lib/site-config";
 
 import "../styles/globals.css";
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 const uiFont = Inter({
   subsets: ["latin"],
   variable: "--font-ui",
@@ -48,7 +50,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const webSiteJsonLd = serializeJsonLd(buildWebsiteJsonLd());
 
   return (
-    <html lang="fr-BE" className={`${uiFont.variable} ${displayFont.variable} ${heroFont.variable}`}>
+    <html
+      lang="fr-BE"
+      className={`${uiFont.variable} ${displayFont.variable} ${heroFont.variable}`}
+    >
       <body className="min-h-screen antialiased">
         <script
           type="application/ld+json"
@@ -63,6 +68,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <main className="flex-1">{children}</main>
           <SiteFooter />
         </div>
+        <SpeedInsights />
       </body>
     </html>
   );
