@@ -186,6 +186,28 @@ export const listCitySlugs = async (): Promise<QueryResult<Array<{ city: string;
   }
 };
 
+export const listCommerceSlugs = async (): Promise<
+  QueryResult<Array<{ slug: string; updatedAt: Date }>>
+> => {
+  try {
+    const rows = await prisma.commerce.findMany({
+      select: {
+        slug: true,
+        updatedAt: true
+      },
+      orderBy: [{ city: "asc" }, { name: "asc" }]
+    });
+
+    return { ok: true, data: rows };
+  } catch (error) {
+    logDbError("listCommerceSlugs", error);
+    return {
+      ok: false,
+      error: DB_UNAVAILABLE_ERROR
+    };
+  }
+};
+
 const buildCitySearchEntries = (
   cities: Array<{ city: string; slug: string }>,
   normalizedQuery: string
