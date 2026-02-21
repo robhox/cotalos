@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 const headerLinks = [
-  { href: "/#comment-ca-marche", label: "Comment ca marche" },
-  { href: "/#faq", label: "FAQ" }
+  { href: "/#comment-ca-marche", label: "Comment ça marche" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export function SiteHeader() {

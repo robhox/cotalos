@@ -102,7 +102,7 @@ export default async function HomePage() {
         >
           <div className="flex flex-wrap items-end justify-between gap-4">
             <h2 className="font-display text-3xl text-[color:var(--color-primary)] md:text-4xl">
-              Comment ca marche
+              Comment ça marche
             </h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">

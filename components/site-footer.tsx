@@ -30,7 +30,7 @@ export function SiteFooter() {
               href="/#comment-ca-marche"
               className="block hover:text-[color:var(--color-accent)]"
             >
-              Comment ca marche
+              Comment ça marche
             </Link>
           </nav>
 
