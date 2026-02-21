@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { SearchBox } from "@/components/search/search-box";
-import { buildSearchIndex } from "@/lib/mock-data";
+import { getDatabaseStatus } from "@/lib/data/commerces";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -10,8 +10,6 @@ export const metadata = buildMetadata({
     "Trouvez une boucherie par ville, code postal ou nom de commerce. La commande en ligne arrive bientot.",
   path: "/"
 });
-
-const searchIndex = buildSearchIndex();
 
 const steps = [
   {
@@ -44,7 +42,14 @@ const faqItems = [
   }
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const dbStatus = await getDatabaseStatus();
+  const dbUnavailableMessage = !dbStatus.ok
+    ? dbStatus.error
+    : dbStatus.data.hasData
+      ? null
+      : "Aucune donnee importee. Lancez l import BCE/KBO pour alimenter l annuaire.";
+
   return (
     <div className="relative isolate overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
@@ -59,21 +64,26 @@ export default function HomePage() {
           <div className="relative grid gap-8 lg:items-start">
             <div className="space-y-7 flex flex-col items-center">
               <p className="inline-flex rounded-full border border-[color:var(--color-primary)]/25 bg-white/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-primary)]">
-                Annuaire des boucheries et traiteurs
+                Annuaire des boucheries belges 🇧🇪
               </p>
 
               <h1 className="max-w-3xl text-center font-hero md:leading-tight text-4xl text-[color:var(--color-primary)] sm:text-5xl md:text-6xl">
-                Commandez en ligne chez votre boucher ou traiteur
+                Passez vos commandes en ligne chez votre boucher
               </h1>
 
               <p className="max-w-2xl text-base leading-7 text-black/75 md:text-lg">
-                Trouvez votre boucherie ou votre traiteur par ville, code postal
-                ou via son nom
+                Trouvez votre boucherie par ville, code postal ou via son nom
               </p>
 
               <div className="w-full max-w-4xl pt-2 md:pt-4">
-                <SearchBox index={searchIndex} />
+                <SearchBox />
               </div>
+
+              {dbUnavailableMessage ? (
+                <p className="w-full max-w-4xl rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  {dbUnavailableMessage}
+                </p>
+              ) : null}
             </div>
           </div>
         </section>
@@ -108,7 +118,7 @@ export default function HomePage() {
 
         <section
           id="commercants"
-          className="reveal rounded-xl relative overflow-hidden bg-[color:var(--color-primary)] px-6 py-10 text-[color:var(--color-bg)] md:-mx-8 md:px-12 md:py-12"
+          className="reveal rounded-xl relative overflow-hidden bg-[color:var(--color-primary)] px-6 py-10 text-[color:var(--color-bg)] xl:-mx-8 xl:px-12 xl:py-12"
           style={{ animationDelay: "220ms" }}
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.18),transparent_45%),radial-gradient(circle_at_88%_80%,rgba(194,168,120,0.35),transparent_42%)]" />

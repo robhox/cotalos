@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { LegalDisclaimer } from "@/components/legal-disclaimer";
-import { commerces, getCommerceBySlug } from "@/lib/mock-data";
+import { getCommerceBySlug } from "@/lib/data/commerces";
 import { buildMetadata } from "@/lib/seo";
 
 interface CommercePageProps {
@@ -18,21 +18,27 @@ const categoryLabel: Record<string, string> = {
   traiteur: "Traiteur"
 };
 
-export function generateStaticParams(): Array<{ slug: string }> {
-  return commerces.map((commerce) => ({ slug: commerce.slug }));
-}
-
 export async function generateMetadata({ params }: CommercePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const commerce = getCommerceBySlug(slug);
+  const result = await getCommerceBySlug(slug);
 
-  if (!commerce) {
+  if (!result.ok) {
+    return buildMetadata({
+      title: "Base indisponible - cotalos.be",
+      description: result.error,
+      path: `/boucherie/${slug}`
+    });
+  }
+
+  if (!result.data) {
     return buildMetadata({
       title: "Commerce introuvable - cotalos.be",
       description: "La fiche commerce recherchee est introuvable.",
       path: `/boucherie/${slug}`
     });
   }
+
+  const commerce = result.data;
 
   return buildMetadata({
     title: `${commerce.nom} - ${commerce.ville} | cotalos.be`,
@@ -43,14 +49,27 @@ export async function generateMetadata({ params }: CommercePageProps): Promise<M
 
 export default async function CommercePage({ params }: CommercePageProps) {
   const { slug } = await params;
-  const commerce = getCommerceBySlug(slug);
+  const result = await getCommerceBySlug(slug);
 
+  if (!result.ok) {
+    return (
+      <section className="mx-auto w-full max-w-5xl px-6 py-14 md:px-10 md:py-20">
+        <header className="mb-8 space-y-3">
+          <h1 className="font-display text-4xl text-[color:var(--color-primary)] md:text-5xl">
+            Base locale indisponible
+          </h1>
+          <p className="max-w-3xl text-black/70">{result.error}</p>
+        </header>
+      </section>
+    );
+  }
+
+  const commerce = result.data;
   if (!commerce) {
     notFound();
   }
 
   const readableCategory = categoryLabel[commerce.categorie] ?? commerce.categorie;
-  const sanitizedPhone = commerce.telephone?.replace(/\s+/g, "");
 
   return (
     <div className="relative isolate overflow-hidden">

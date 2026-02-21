@@ -1,9 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSearchIndex, resolveSearchTarget } from "@/lib/mock-data";
+import { resolveSearchTarget } from "@/lib/data/search";
+import type { SearchIndexEntry } from "@/lib/types";
 
 describe("resolveSearchTarget", () => {
-  const index = buildSearchIndex();
+  const index: SearchIndexEntry[] = [
+    { type: "ville", label: "Bruxelles", targetPath: "/boucheries/bruxelles" },
+    { type: "ville", label: "1000 Bruxelles", targetPath: "/boucheries/bruxelles" },
+    {
+      type: "commerce",
+      label: "Boucherie Royale (Bruxelles)",
+      targetPath: "/boucherie/boucherie-royale-bruxelles-centre"
+    }
+  ];
 
   it("returns city route for exact city query", () => {
     const result = resolveSearchTarget("Bruxelles", index);

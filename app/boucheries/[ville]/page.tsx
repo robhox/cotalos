@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getCommercesByVille, getUniqueVilles, slugifyVille } from "@/lib/mock-data";
+import { getCommercesByCitySlug } from "@/lib/data/commerces";
 import { buildMetadata } from "@/lib/seo";
 
 interface VillePageProps {
@@ -11,15 +11,19 @@ interface VillePageProps {
   }>;
 }
 
-export function generateStaticParams(): Array<{ ville: string }> {
-  return getUniqueVilles().map((ville) => ({ ville: slugifyVille(ville) }));
-}
-
 export async function generateMetadata({ params }: VillePageProps): Promise<Metadata> {
   const { ville: villeParam } = await params;
-  const ville = getUniqueVilles().find((entry) => slugifyVille(entry) === villeParam);
+  const result = await getCommercesByCitySlug(villeParam);
 
-  if (!ville) {
+  if (!result.ok) {
+    return buildMetadata({
+      title: "Base indisponible - cotalos.be",
+      description: result.error,
+      path: `/boucheries/${villeParam}`
+    });
+  }
+
+  if (!result.data) {
     return buildMetadata({
       title: "Ville introuvable - cotalos.be",
       description: "La ville demandee n est pas disponible.",
@@ -28,27 +32,40 @@ export async function generateMetadata({ params }: VillePageProps): Promise<Meta
   }
 
   return buildMetadata({
-    title: `Boucheries et traiteurs a ${ville} - cotalos.be`,
-    description: `Decouvrez les commerces de bouche references a ${ville}. Service de precommande non actif pour le moment.`,
+    title: `Boucheries et traiteurs a ${result.data.city} - cotalos.be`,
+    description: `Decouvrez les commerces de bouche references a ${result.data.city}. Service de precommande non actif pour le moment.`,
     path: `/boucheries/${villeParam}`
   });
 }
 
 export default async function VillePage({ params }: VillePageProps) {
   const { ville: villeParam } = await params;
-  const ville = getUniqueVilles().find((entry) => slugifyVille(entry) === villeParam);
+  const result = await getCommercesByCitySlug(villeParam);
 
-  if (!ville) {
+  if (!result.ok) {
+    return (
+      <section className="mx-auto w-full max-w-5xl px-6 py-14 md:px-10 md:py-20">
+        <header className="mb-8 space-y-3">
+          <h1 className="font-display text-4xl text-[color:var(--color-primary)] md:text-5xl">
+            Base locale indisponible
+          </h1>
+          <p className="max-w-3xl text-black/70">{result.error}</p>
+        </header>
+      </section>
+    );
+  }
+
+  if (!result.data) {
     notFound();
   }
 
-  const commerces = getCommercesByVille(villeParam);
+  const { city, commerces } = result.data;
 
   return (
     <section className="mx-auto w-full max-w-5xl px-6 py-14 md:px-10 md:py-20">
       <header className="reveal mb-8 space-y-3">
         <h1 className="font-display text-4xl text-[color:var(--color-primary)] md:text-5xl">
-          {ville}
+          {city}
         </h1>
         <p className="max-w-3xl text-black/70">
           Liste locale de boucheries, charcuteries et traiteurs.

@@ -1,18 +1,51 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
-import { normalizeSearchValue, resolveSearchTarget } from "@/lib/mock-data";
+import { normalizeSearchValue, resolveSearchTarget } from "@/lib/data/search";
 import type { SearchIndexEntry } from "@/lib/types";
 
-interface SearchBoxProps {
-  index: SearchIndexEntry[];
+const SEARCH_LIMIT = 6;
+
+async function fetchSearchEntries(query: string, limit = SEARCH_LIMIT): Promise<{
+  entries: SearchIndexEntry[];
+  error?: string;
+}> {
+  const params = new URLSearchParams();
+  params.set("q", query);
+  params.set("limit", String(limit));
+
+  const response = await fetch(`/api/search?${params.toString()}`, {
+    method: "GET",
+    cache: "no-store"
+  });
+
+  const payload = (await response.json()) as {
+    entries?: SearchIndexEntry[];
+    error?: string;
+  };
+
+  if (!response.ok) {
+    return {
+      entries: payload.entries ?? [],
+      error:
+        payload.error ??
+        "Base locale indisponible. Lancez PostgreSQL et relancez l import."
+    };
+  }
+
+  return {
+    entries: payload.entries ?? []
+  };
 }
 
-export function SearchBox({ index }: SearchBoxProps) {
+export function SearchBox() {
   const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<SearchIndexEntry[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -20,15 +53,24 @@ export function SearchBox({ index }: SearchBoxProps) {
 
   const normalizedQuery = useMemo(() => normalizeSearchValue(query), [query]);
 
-  const suggestions = useMemo(() => {
-    if (!normalizedQuery) {
-      return index.slice(0, 6);
-    }
+  useEffect(() => {
+    let cancelled = false;
+    const timeoutId = setTimeout(async () => {
+      setIsLoadingSuggestions(true);
+      const result = await fetchSearchEntries(query, SEARCH_LIMIT);
+      if (cancelled) {
+        return;
+      }
+      setSuggestions(result.entries);
+      setApiErrorMessage(result.error ?? null);
+      setIsLoadingSuggestions(false);
+    }, 250);
 
-    return index
-      .filter((entry) => normalizeSearchValue(entry.label).includes(normalizedQuery))
-      .slice(0, 6);
-  }, [index, normalizedQuery]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [query]);
 
   const navigateTo = (entry: SearchIndexEntry): void => {
     setErrorMessage(null);
@@ -38,13 +80,23 @@ export function SearchBox({ index }: SearchBoxProps) {
     });
   };
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const target = resolveSearchTarget(query, index);
+
+    let submitEntries = suggestions;
+    if (submitEntries.length === 0) {
+      const result = await fetchSearchEntries(query, SEARCH_LIMIT);
+      setApiErrorMessage(result.error ?? null);
+      submitEntries = result.entries;
+      setSuggestions(result.entries);
+    }
+
+    const target = resolveSearchTarget(query, submitEntries) ?? submitEntries[0] ?? null;
     if (!target) {
       setErrorMessage("Aucun resultat. Essayez une autre ville ou un autre commerce.");
       return;
     }
+
     navigateTo(target);
   };
 
@@ -109,7 +161,9 @@ export function SearchBox({ index }: SearchBoxProps) {
           <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-primary)]/70">
             {normalizedQuery ? "Suggestions" : "Recherches rapides"}
           </p>
-          <p className="text-xs text-black/50">{index.length} entrees</p>
+          <p className="text-xs text-black/50">
+            {isLoadingSuggestions ? "Chargement..." : `${suggestions.length} entrees`}
+          </p>
         </div>
 
         {suggestions.length ? (
@@ -135,6 +189,12 @@ export function SearchBox({ index }: SearchBoxProps) {
         ) : normalizedQuery ? (
           <p className="rounded-xl border border-dashed border-black/20 bg-white/70 px-4 py-3 text-sm text-black/60">
             Aucun resultat pour cette recherche.
+          </p>
+        ) : null}
+
+        {apiErrorMessage ? (
+          <p className="rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {apiErrorMessage}
           </p>
         ) : null}
 

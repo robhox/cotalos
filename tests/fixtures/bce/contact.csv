@@ -1,0 +1,4 @@
+"EntityNumber","EntityContact","ContactType","Value"
+"0123.456.789","ENT","TEL","02 000 00 00"
+"0123.456.789","ENT","EMAIL","contact@boucherie.test"
+"0123.456.789","ENT","WEB","https://boucherie.test"

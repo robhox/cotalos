@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ImportStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model ImportRun {
+  id               String       @id @default(uuid())
+  startedAt        DateTime     @default(now())
+  finishedAt       DateTime?
+  status           ImportStatus
+  dataDir          String
+  snapshotDate     DateTime?
+  extractTimestamp DateTime?
+  rowsScanned      Int          @default(0)
+  rowsSelected     Int          @default(0)
+  rowsInserted     Int          @default(0)
+  rowsSkipped      Int          @default(0)
+  errorMessage     String?
+  commerces        Commerce[]
+
+  @@index([status])
+  @@index([startedAt])
+}
+
+model Commerce {
+  id                  String    @id @default(uuid())
+  establishmentNumber String    @unique
+  enterpriseNumber    String
+  name                String
+  slug                String    @unique
+  category            String
+  naceVersion         String
+  naceCode            String
+  matchedNaceCodes    String[]
+  addressLine         String
+  postalCode          String
+  city                String
+  country             String
+  phone               String?
+  email               String?
+  website             String?
+  source              String
+  sourceSnapshotDate  DateTime?
+  sourceExtractedAt   DateTime?
+  importRunId         String
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  importRun           ImportRun @relation(fields: [importRunId], references: [id], onDelete: Restrict)
+
+  @@index([enterpriseNumber])
+  @@index([name])
+  @@index([postalCode])
+  @@index([city])
+}
