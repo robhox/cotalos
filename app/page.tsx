@@ -131,7 +131,7 @@ export default async function HomePage() {
                 Vous etes boucher ou traiteur ?
               </h2>
               <p className="max-w-2xl text-sm leading-7 text-[color:var(--color-bg)]/85 md:text-base">
-                Activez la precommande en ligne, reduisez les appels repetitifs
+                Activez les commandes en ligne, réduisez les appels répétitifs
                 et simplifiez vos retraits en boutique.
               </p>
             </div>

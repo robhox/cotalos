@@ -202,7 +202,7 @@ export default async function VillePage({ params }: VillePageProps) {
                 Pour les commercants
               </p>
               <h3 className="mt-3 font-display text-3xl">
-                Activez la precommande
+                Passez à la commande en ligne
               </h3>
               <p className="mt-3 text-sm leading-6 text-[color:var(--color-bg)]/85">
                 Vous tenez un commerce a {city} ? Gagnez du temps sur les appels
@@ -210,7 +210,8 @@ export default async function VillePage({ params }: VillePageProps) {
               </p>
               <Link
                 href="/gerer-ou-supprimer-cette-fiche"
-                className="mt-5 inline-flex h-11 items-center rounded-xl bg-[color:var(--color-bg)] px-5 text-sm font-semibold text-[color:var(--color-primary)] hover:bg-[color:var(--color-bg)]/92"
+                className="mt-5 inline-flex w-full justify-center h-11 items-center rounded-xl bg-[color:var(--color-bg)] px-5 text-sm font-semibold text-[color:var(--color-primary)] hover:bg-[color:var(--color-bg)]/92"
+                style={{ color: "var(--color-primary)" }}
               >
                 Contacter cotalos
               </Link>

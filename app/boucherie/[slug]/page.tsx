@@ -413,6 +413,7 @@ export default async function CommercePage({
               <Link
                 href="/gerer-ou-supprimer-cette-fiche"
                 className="mt-5 inline-flex h-11 w-full text-center justify-center items-center rounded-xl bg-[color:var(--color-bg)] px-5 text-sm font-semibold text-[color:var(--color-primary)] hover:bg-[color:var(--color-bg)]/92"
+                style={{ color: "var(--color-primary)" }}
               >
                 Contacter cotalos
               </Link>
