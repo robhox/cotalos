@@ -139,6 +139,7 @@ export default async function HomePage() {
               <Link
                 href="/gerer-ou-supprimer-cette-fiche"
                 className="inline-flex h-12 items-center rounded-xl bg-[color:var(--color-bg)] px-6 text-sm font-semibold text-[color:var(--color-primary)] hover:bg-[color:var(--color-bg)]/92"
+                style={{ color: "var(--color-primary)" }}
                 data-track="merchant_cta_click"
               >
                 Prenez contact avec nous
