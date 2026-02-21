@@ -7,6 +7,7 @@ export const revalidate = 21600;
 
 const STATIC_PATHS = [
   "/",
+  "/recherche",
   "/cookies",
   "/mentions-legales",
   "/politique-confidentialite",

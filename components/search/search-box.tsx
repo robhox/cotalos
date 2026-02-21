@@ -5,7 +5,7 @@ import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 
-import { normalizeSearchValue, resolveSearchTarget } from "@/lib/data/search";
+import { normalizeSearchValue } from "@/lib/data/search";
 import type { SearchIndexEntry } from "@/lib/types";
 
 const SEARCH_LIMIT = 6;
@@ -47,7 +47,6 @@ export function SearchBox() {
   const [suggestions, setSuggestions] = useState<SearchIndexEntry[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -74,7 +73,6 @@ export function SearchBox() {
   }, [query]);
 
   const navigateTo = (entry: SearchIndexEntry): void => {
-    setErrorMessage(null);
     setQuery(entry.label);
     startTransition(() => {
       router.push(entry.targetPath);
@@ -91,34 +89,26 @@ export function SearchBox() {
     navigateTo(suggestion);
   };
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+  const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
 
-    let submitEntries = suggestions;
-    if (submitEntries.length === 0) {
-      const result = await fetchSearchEntries(query, SEARCH_LIMIT);
-      setApiErrorMessage(result.error ?? null);
-      submitEntries = result.entries;
-      setSuggestions(result.entries);
+    const trimmedQuery = query.replace(/\s+/g, " ").trim();
+    const params = new URLSearchParams();
+    if (trimmedQuery) {
+      params.set("q", trimmedQuery);
     }
-
-    const target = resolveSearchTarget(query, submitEntries) ?? submitEntries[0] ?? null;
-    if (!target) {
-      setErrorMessage("Aucun resultat. Essayez une autre ville ou un autre commerce.");
-      posthog.capture("search_no_results", {
-        query,
-        suggestions_count: submitEntries.length,
-      });
-      return;
-    }
+    const queryString = params.toString();
+    const destinationPath = queryString ? `/recherche?${queryString}` : "/recherche";
 
     posthog.capture("search_submitted", {
-      query,
-      result_label: target.label,
-      result_type: target.type,
-      result_path: target.targetPath,
+      query: trimmedQuery,
+      suggestions_count: suggestions.length,
+      destination_path: destinationPath,
     });
-    navigateTo(target);
+
+    startTransition(() => {
+      router.push(destinationPath);
+    });
   };
 
   return (
@@ -158,9 +148,6 @@ export function SearchBox() {
               onBlur={() => setIsFocused(false)}
               onChange={(event) => {
                 setQuery(event.target.value);
-                if (errorMessage) {
-                  setErrorMessage(null);
-                }
               }}
               placeholder="Ville, code postal ou boucherie"
               className="h-12 w-full rounded-xl border border-black/15 bg-white/92 pl-11 pr-4 text-[15px] outline-none transition-all placeholder:text-black/50 focus:border-[color:var(--color-primary)]/70 focus:bg-white focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
@@ -219,11 +206,6 @@ export function SearchBox() {
           </p>
         ) : null}
 
-        {errorMessage ? (
-          <p className="rounded-xl border border-[color:var(--color-primary)]/20 bg-[color:var(--color-primary)]/8 px-4 py-3 text-sm text-[color:var(--color-primary)]">
-            {errorMessage}
-          </p>
-        ) : null}
       </div>
       <div
         aria-hidden
