@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildBreadcrumbJsonLd,
+  buildCollectionPageJsonLd,
+  buildLocalBusinessJsonLd,
   buildOrganizationJsonLd,
   buildWebsiteJsonLd,
   serializeJsonLd
@@ -39,6 +41,56 @@ describe("seo schema helpers", () => {
         item: "https://cotalos.be/boucheries/namur"
       }
     ]);
+  });
+
+  it("builds collection page schema with bounded item list", () => {
+    const collection = buildCollectionPageJsonLd({
+      name: "Boucheries a Namur",
+      description: "Annuaire local des boucheries a Namur.",
+      path: "/boucheries/namur",
+      items: [
+        { name: "Boucherie A", path: "/boucherie/a" },
+        { name: "Boucherie B", path: "/boucherie/b" }
+      ],
+      maxItems: 1
+    });
+
+    expect(collection["@type"]).toBe("CollectionPage");
+    expect(collection.url).toBe("https://cotalos.be/boucheries/namur");
+    expect(collection.mainEntity).toEqual({
+      "@type": "ItemList",
+      numberOfItems: 2,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Boucherie A",
+          item: "https://cotalos.be/boucherie/a"
+        }
+      ]
+    });
+  });
+
+  it("builds local business schema with postal address", () => {
+    const localBusiness = buildLocalBusinessJsonLd({
+      name: "Boucherie de Namur",
+      path: "/boucherie/boucherie-de-namur",
+      streetAddress: "Rue de Test 1",
+      postalCode: "5000",
+      city: "Namur",
+      phone: "+32 81 12 34 56"
+    });
+
+    expect(localBusiness["@type"]).toBe("LocalBusiness");
+    expect(localBusiness.url).toBe("https://cotalos.be/boucherie/boucherie-de-namur");
+    expect(localBusiness.address).toEqual({
+      "@type": "PostalAddress",
+      streetAddress: "Rue de Test 1",
+      addressLocality: "Namur",
+      postalCode: "5000",
+      addressCountry: "BE"
+    });
+    expect(localBusiness.telephone).toBe("+32 81 12 34 56");
   });
 
   it("serializes JSON-LD safely", () => {

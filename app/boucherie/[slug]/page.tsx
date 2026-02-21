@@ -12,7 +12,11 @@ import {
 } from "@/lib/data/commerces";
 import { slugifyVille } from "@/lib/data/search";
 import { buildMetadata } from "@/lib/seo";
-import { buildBreadcrumbJsonLd, serializeJsonLd } from "@/lib/seo-schema";
+import {
+  buildBreadcrumbJsonLd,
+  buildLocalBusinessJsonLd,
+  serializeJsonLd
+} from "@/lib/seo-schema";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 interface CommercePageProps {
@@ -223,6 +227,16 @@ export default async function CommercePage({
       { name: commerce.nom, path },
     ]),
   );
+  const localBusinessJsonLd = serializeJsonLd(
+    buildLocalBusinessJsonLd({
+      name: commerce.nom,
+      path,
+      streetAddress: commerce.adresse,
+      postalCode: commerce.codePostal,
+      city: commerce.ville,
+      phone: commerce.telephone
+    })
+  );
 
   // Track commerce page view server-side (top of interest conversion funnel)
   const posthog = getPostHogClient();
@@ -247,6 +261,10 @@ export default async function CommercePage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: localBusinessJsonLd }}
       />
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-[color:var(--color-accent)]/24 blur-3xl" />

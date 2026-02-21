@@ -108,6 +108,7 @@ Mettre a jour les placeholders dans:
 ## Routes publiques
 
 - `/`
+- `/cookies`
 - `/mentions-legales`
 - `/politique-confidentialite`
 - `/gerer-ou-supprimer-cette-fiche`

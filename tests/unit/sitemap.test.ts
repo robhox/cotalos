@@ -40,12 +40,14 @@ describe("sitemap route", () => {
     const entries = await sitemap();
 
     const homepage = entries.find((entry) => entry.url === "https://cotalos.be");
+    const cookiesPage = entries.find((entry) => entry.url === "https://cotalos.be/cookies");
     const city = entries.find((entry) => entry.url === "https://cotalos.be/boucheries/namur");
     const commerce = entries.find(
       (entry) => entry.url === "https://cotalos.be/boucherie/boucherie-namur-5000-123"
     );
 
     expect(toIsoString(homepage?.lastModified)).toBe(siteConfig.staticPagesLastModified);
+    expect(toIsoString(cookiesPage?.lastModified)).toBe(siteConfig.staticPagesLastModified);
     expect(toIsoString(city?.lastModified)).toBe(cityUpdatedAt.toISOString());
     expect(toIsoString(commerce?.lastModified)).toBe(commerceUpdatedAt.toISOString());
   });

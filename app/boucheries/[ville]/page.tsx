@@ -4,7 +4,11 @@ import { notFound } from "next/navigation";
 
 import { getCommercesByCitySlug } from "@/lib/data/commerces";
 import { buildMetadata } from "@/lib/seo";
-import { buildBreadcrumbJsonLd, serializeJsonLd } from "@/lib/seo-schema";
+import {
+  buildBreadcrumbJsonLd,
+  buildCollectionPageJsonLd,
+  serializeJsonLd
+} from "@/lib/seo-schema";
 
 interface VillePageProps {
   params: Promise<{
@@ -56,14 +60,26 @@ export default async function VillePage({ params }: VillePageProps) {
   }
 
   const { city, commerces } = result.data;
+  const cityPath = `/boucheries/${villeParam}`;
   const postalCodes = Array.from(
     new Set(commerces.map((commerce) => commerce.codePostal)),
   ).sort((a, b) => a.localeCompare(b, "fr"));
   const breadcrumbJsonLd = serializeJsonLd(
     buildBreadcrumbJsonLd([
       { name: "Accueil", path: "/" },
-      { name: `Boucheries a ${city}`, path: `/boucheries/${villeParam}` },
+      { name: `Boucheries a ${city}`, path: cityPath },
     ]),
+  );
+  const cityCollectionJsonLd = serializeJsonLd(
+    buildCollectionPageJsonLd({
+      name: `Boucheries a ${city}`,
+      description: `Annuaire local des boucheries a ${city}.`,
+      path: cityPath,
+      items: commerces.map((commerce) => ({
+        name: commerce.nom,
+        path: `/boucherie/${commerce.slug}`
+      }))
+    })
   );
 
   return (
@@ -71,6 +87,10 @@ export default async function VillePage({ params }: VillePageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: cityCollectionJsonLd }}
       />
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-[color:var(--color-accent)]/24 blur-3xl" />

@@ -4,12 +4,7 @@ export interface LegalIdentity {
   editorName: string;
   legalForm: string;
   registrationNumber: string;
-  vatNumber: string;
-  address: string;
   contactEmail: string;
-  hostName: string;
-  hostAddress: string;
-  hostPhone: string;
   deletionRequestEmail: string;
   deletionSlaBusinessDays: number;
 }

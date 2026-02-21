@@ -70,7 +70,7 @@ export function SiteFooter() {
                 Confidentialite
               </Link>
               <Link
-                href="/politique-confidentialite"
+                href="/cookies"
                 className="block hover:text-[color:var(--color-accent)]"
               >
                 Cookies

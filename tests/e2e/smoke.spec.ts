@@ -33,6 +33,7 @@ test("all core routes return 200", async ({ page }) => {
 
   const smokeRoutes = [
     "/",
+    "/cookies",
     "/mentions-legales",
     "/politique-confidentialite",
     "/gerer-ou-supprimer-cette-fiche",
