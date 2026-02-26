@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 const headerLinks = [
+  { href: "/boucheries", label: "Boucheries par villes" },
   { href: "/#comment-ca-marche", label: "Comment ça marche" },
   { href: "/#faq", label: "FAQ" },
 ];

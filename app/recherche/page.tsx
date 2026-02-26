@@ -37,19 +37,31 @@ export async function generateMetadata({
   const normalizedQuery = normalizeSearchValue(query);
 
   if (!normalizedQuery) {
-    return buildMetadata({
-      title: "Recherche de boucheries en Belgique | cotalos.be",
-      description:
-        "Consultez les resultats de recherche par ville, code postal ou nom de commerce.",
-      path: "/recherche",
-    });
+    return {
+      ...buildMetadata({
+        title: "Recherche de boucheries en Belgique | cotalos.be",
+        description:
+          "Consultez les resultats de recherche par ville, code postal ou nom de commerce.",
+        path: "/recherche",
+      }),
+      robots: {
+        index: false,
+        follow: true
+      }
+    };
   }
 
-  return buildMetadata({
-    title: `Resultats de recherche pour "${query}" | cotalos.be`,
-    description: `Decouvrez les boucheries correspondant a la recherche "${query}".`,
-    path: buildSearchPath(query),
-  });
+  return {
+    ...buildMetadata({
+      title: `Resultats de recherche pour "${query}" | cotalos.be`,
+      description: `Decouvrez les boucheries correspondant a la recherche "${query}".`,
+      path: "/recherche",
+    }),
+    robots: {
+      index: false,
+      follow: true
+    }
+  };
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {

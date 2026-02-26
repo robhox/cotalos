@@ -132,9 +132,12 @@ export default async function HomePage() {
               <h2 className="font-display text-3xl text-[color:var(--color-primary)] md:text-4xl">
                 Villes populaires
               </h2>
-              <p className="text-xs uppercase tracking-[0.16em] text-black/60">
-                Liens rapides
-              </p>
+              <Link
+                href="/boucheries"
+                className="text-xs font-semibold uppercase tracking-[0.16em] text-black/60 hover:text-[color:var(--color-primary)]"
+              >
+                Voir toutes les villes
+              </Link>
             </div>
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {popularCityLinks.map((entry) => (
