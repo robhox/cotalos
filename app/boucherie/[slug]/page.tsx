@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { InterestStatusUrlCleaner } from "@/components/interest-status-url-cleaner";
@@ -237,6 +238,8 @@ export default async function CommercePage({
       phone: commerce.telephone
     })
   );
+  const requestHeaders = await headers();
+  const userAgent = requestHeaders.get("user-agent");
 
   // Track commerce page view server-side (top of interest conversion funnel)
   const posthog = getPostHogClient();
@@ -250,6 +253,7 @@ export default async function CommercePage({
       commerce_categorie: commerce.categorie,
       interest_count: interestCount,
       $current_url: `https://cotalos.be${path}`,
+      ...(userAgent ? { $user_agent: userAgent } : {}),
     },
   });
 
