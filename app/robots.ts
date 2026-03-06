@@ -21,13 +21,22 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: "AhrefsBot",
-        disallow: "/"
+        userAgent: [
+          "Googlebot",
+          "AdsBot-Google",
+          "Googlebot-Image",
+          "Googlebot-News",
+          "Googlebot-Video",
+          "Mediapartners-Google",
+          "Google-InspectionTool",
+          "Storebot-Google"
+        ],
+        allow: "/",
+        disallow: "/api/"
       },
       {
         userAgent: "*",
-        allow: "/",
-        disallow: "/api/"
+        disallow: "/"
       }
     ],
     sitemap: `${siteConfig.siteUrl}/sitemap.xml`
